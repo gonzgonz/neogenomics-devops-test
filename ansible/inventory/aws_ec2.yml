@@ -1,0 +1,11 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - eu-north-1
+filters:
+  tag:Name: my_instance_dev
+keyed_groups:
+  - key: tags.Name
+    prefix: tag
+compose:
+  ansible_host: public_ip_address
+ansible_ssh_common_args: '-F ~/.ssh/config -o ForwardAgent=yes'
