@@ -1,0 +1,17 @@
+# Ignore Terraform files
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+*.tfstate
+*.tfstate.backup
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore Python virtual environments
+venv/
+__pycache__/
+
+# Ignore any AWS credentials
+*.pem
