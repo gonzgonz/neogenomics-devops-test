@@ -7,7 +7,18 @@ This repo contains:
   - `vpc/`: Creates the networking setup (VPC, subnets, security groups, etc.).
   - `ec2/`: Deploys an EC2 instance inside the VPC.
 
-## Running the Setup
+## Running from your machine
+### **Terraform**
+Terraform modules must be applied separately:
+```bash
+cd terraform/vpc
+terraform init && terraform apply
+
+cd ../ec2
+terraform init && terraform apply
+```
+Alternatively, **Terragrunt** could have been used to run both at once while making the state configuration **DRY**, but per the assignment’s request to keep it simple, I left that out.
+
 ### **Ansible**
 To run the Ansible playbook (after deploying the EC2 instance):
 ```bash
@@ -20,16 +31,10 @@ This will:
 - Set up Gunicorn as a systemd service
 - Configure Nginx as a reverse proxy
 
-### **Terraform**
-Terraform modules must be applied separately:
-```bash
-cd terraform/vpc
-terraform init && terraform apply
+**IMPORTANT**
+This setup assumes yor public key is added to my sample app repo on github, and that you are forwarding your SSH private key through the SSH agent.
+I did it this way to demonstrate a way to clone the repo via SSH without copying the key into the instance. In real life this could probably use an access token or a deploy key instead.
 
-cd ../ec2
-terraform init && terraform apply
-```
-Alternatively, **Terragrunt** could have been used to run both at once while making the state configuration **DRY**, but per the assignment’s request to **keep it simple**, I left that out.
 
 ## Pre-commit Hooks
 Before committing changes, set up **pre-commit** to enforce style checks:

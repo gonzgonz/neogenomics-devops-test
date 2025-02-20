@@ -2,38 +2,40 @@ terraform {
   backend "s3" {
     bucket         = "my-tf-state-gonzaloarce"
     key            = "neogenomics-devops-test/ec2.tfstate"
-    region         = "eu-north-1"
+    region         = var.region
     dynamodb_table = "my-tf-lock"
     encrypt        = true
   }
 }
 
 provider "aws" {
-  region = "eu-north-1"
+  region = var.region
 }
 
 
 resource "aws_instance" "my_instance_dev" {
   ami           = data.aws_ami.latest_amazon_linux.id
-  instance_type = "t3.micro"
+  instance_type = var.instance_type
 
   subnet_id                   = data.terraform_remote_state.vpc.outputs.public_subnet_ids[0]
   associate_public_ip_address = true
 
-  key_name = "gonzaloarce-k8s" # Replace with your actual AWS key pair if you want to run this -- I used an existing keypair of mine.
+  key_name = var.key_name
 
-  security_groups = [aws_security_group.instance_sg.id]
+  vpc_security_group_ids = [aws_security_group.instance_sg.id]
 
 
   root_block_device {
-    volume_size           = 8
+    volume_size           = var.volume_size
     volume_type           = "gp3"
     delete_on_termination = true
   }
 
   tags = {
-    Name = "my_instance_dev"
+    Name = var.instance_name
   }
+
+  depends_on = [aws_security_group.instance_sg]
 }
 
 resource "aws_security_group" "instance_sg" {

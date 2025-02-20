@@ -28,7 +28,13 @@ No modules.
 
 ## Inputs
 
-No inputs.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_instance_name"></a> [instance\_name](#input\_instance\_name) | Name of the EC2 instance | `string` | `"my_instance_dev"` | no |
+| <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | EC2 instance type | `string` | `"t3.micro"` | no |
+| <a name="input_key_name"></a> [key\_name](#input\_key\_name) | SSH key pair name to access EC2 instance | `string` | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | AWS region to deploy resources | `string` | `"eu-north-1"` | no |
+| <a name="input_volume_size"></a> [volume\_size](#input\_volume\_size) | Root volume size in GB | `number` | `8` | no |
 
 ## Outputs
 

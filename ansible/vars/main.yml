@@ -1,0 +1,3 @@
+---
+git_repo: "git@github.com:gonzgonz/neogenomics-sample-app.git"
+git_branch: "main"  # Default branch, can be overridden

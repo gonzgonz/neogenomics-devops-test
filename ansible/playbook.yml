@@ -3,6 +3,9 @@
   become: true
   become_flags: "-E" # necessary for correct behaviour in the git clone using SSH agent forwarding
 
+  vars_files:
+    - vars/main.yml
+
   pre_tasks:
     - name: Ensure Python 3.8 is installed
       shell: |
@@ -46,13 +49,13 @@
         enabled: yes
 
     # We could use an https clone here, since I made the repo public.
-    # However for the purpose of demonstrating how to forward the local SSH private key using the SSH agent to avoid pushing or copying the private key 
-    # I added the related setup to clone with SSH (should use forwarded key based on ansible.cfg "ssh_connection" settings)
+    # However for the purpose of demonstrating how to forward the local SSH private key using the SSH agent 
+    # I set it to use SSH (and the SSH agent config in ansible.cfg)
     - name: Clone the sample app
       git:
-        repo: "git@github.com:gonzgonz/neogenomics-sample-app.git"
+        repo: "{{ git_repo }}"
         dest: /tmp/my_app
-        version: main
+        version: "{{ git_branch }}"
         force: yes
         accept_hostkey: yes
 
