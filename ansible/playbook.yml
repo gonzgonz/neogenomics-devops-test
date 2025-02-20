@@ -1,3 +1,4 @@
+---
 - name: Configure EC2 Instance
   hosts: tag_my_instance_dev
   become: true
@@ -8,7 +9,7 @@
 
   pre_tasks:
     - name: Ensure Python 3.8 is installed
-      shell: |
+      ansible.builtin.shell: |
         amazon-linux-extras enable python3.8
         yum install -y python3.8
       args:
@@ -16,7 +17,7 @@
       changed_when: false
 
     - name: Ensure Amazon Linux Extra repository is enabled for nginx
-      shell: |
+      ansible.builtin.shell: |
         amazon-linux-extras enable nginx1
         yum clean metadata
         yum makecache
@@ -24,17 +25,16 @@
         executable: /bin/bash
       changed_when: false
 
-
   tasks:
     - name: Create my_app_user
-      user:
+      ansible.builtin.user:
         name: my_app_user
         uid: 1503
         shell: /bin/bash
-        create_home: yes
+        create_home: true
 
     - name: Install required packages
-      yum:
+      ansible.builtin.yum:
         name:
           - nginx
           - python3-devel
@@ -43,93 +43,97 @@
         state: present
 
     - name: Start and enable nginx
-      systemd:
+      ansible.builtin.systemd:
         name: nginx
         state: started
-        enabled: yes
+        enabled: true
 
     # We could use an https clone here, since I made the repo public.
-    # However for the purpose of demonstrating how to forward the local SSH private key using the SSH agent 
+    # However for the purpose of demonstrating how to forward the local SSH private key using the SSH agent
     # I set it to use SSH (and the SSH agent config in ansible.cfg)
     - name: Clone the sample app
-      git:
+      ansible.builtin.git:
         repo: "{{ git_repo }}"
         dest: /tmp/my_app
         version: "{{ git_branch }}"
-        force: yes
-        accept_hostkey: yes
+        force: true
+        accept_hostkey: true
 
     - name: Copy the app to /opt
-      copy:
+      ansible.builtin.copy:
         src: /tmp/my_app/
         dest: /opt/my_app
-        remote_src: yes
+        remote_src: true
         owner: my_app_user
         group: my_app_user
-        mode: '0755'
+        mode: "0755"
       notify: Restart nginx
 
-    - name: Run make install
-      command: make install
-      args:
-        chdir: /opt/my_app
-      notify: Restart nginx
-
-   # I know the assignment was to keep it simple, but I wanted to be able to test the whole thing and get a valid response from the endpoint.
-   # So I went with a gunicorn setup to proxy it to my simple python app and serve it on nginx
+    # I know the assignment was to keep it simple, but I wanted to be able to test the whole thing and get a valid response from the endpoint.
+    # So I went with a gunicorn setup to proxy it to my simple python app and serve it on nginx
     - name: Ensure pip is installed for Python 3.8
-      command: /usr/bin/python3.8 -m ensurepip
+      ansible.builtin.command: /usr/bin/python3.8 -m ensurepip
       args:
         creates: /usr/bin/pip3.8
 
     - name: Upgrade pip for Python 3.8
-      command: /usr/bin/python3.8 -m pip install --upgrade pip
+      ansible.builtin.command: /usr/bin/python3.8 -m pip install --upgrade pip
+      register: pip_upgrade_output
+      changed_when: "'already up-to-date' not in pip_upgrade_output.stdout"
 
     - name: Install Flask and Gunicorn using pip for Python 3.8
-      command: /usr/bin/python3.8 -m pip install flask gunicorn
+      ansible.builtin.pip:
+        name:
+          - flask
+          - gunicorn
+        executable: /usr/bin/pip3.8
+
+    - name: Run make install
+      ansible.builtin.command: make install
+      args:
+        chdir: /opt/my_app
+      register: make_output
+      changed_when: "'Nothing to be done' not in make_output.stdout"
+      notify: Restart nginx
 
     - name: Deploy Gunicorn systemd service file
-      template:
+      ansible.builtin.template:
         src: gunicorn.service.j2
         dest: /etc/systemd/system/gunicorn.service
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
       notify: Restart gunicorn
 
-
     - name: Start and enable Gunicorn
-      systemd:
+      ansible.builtin.systemd:
         name: gunicorn
         state: started
-        enabled: yes
+        enabled: true
       notify: Restart nginx
 
-    
     - name: Ensure NGINX configuration exists
-      template:
+      ansible.builtin.template:
         src: nginx_app.conf.j2
         dest: /etc/nginx/conf.d/my_app.conf
         owner: root
         group: root
-        mode: '0644'
+        mode: "0644"
       notify: Restart nginx
 
-    - name: Remove default NGINX welcome page 
-      file:
+    - name: Remove default NGINX welcome page
+      ansible.builtin.file:
         path: /usr/share/nginx/html/index.html
         state: absent
       notify: Restart nginx
 
-
   handlers:
     - name: Restart nginx
-      systemd:
+      ansible.builtin.systemd:
         name: nginx
         state: restarted
 
     - name: Restart gunicorn
-      systemd:
+      ansible.builtin.systemd:
         name: gunicorn
         state: restarted
-
