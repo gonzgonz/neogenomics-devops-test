@@ -3,7 +3,7 @@ terraform {
     bucket         = "my-tf-state-gonzaloarce" # appended my name to be able to actually test this on my Free tier account (due to unique name contraints on S3)
     key            = "neogenomics-devops-test/terraform.tfstate"
     dynamodb_table = "my-tf-lock"
-    region         = var.region # I used Stockholm for testing, as I already have other test resources here in my Free Tier account.
+    region         = "eu-north-1" # I used Stockholm for testing, as I already have other test resources here in my Free Tier account.
     encrypt        = true
   }
 }

@@ -1,0 +1,11 @@
+---
+exclude_paths:
+  - inventory/
+  - templates/
+  - vars/
+warn_list:
+  - experimental # Warn about experimental features
+  - fqcn # Warn if fully qualified collection names are not used
+  - yaml
+  - formatting
+  - risky-shell-pipe # Detect risky shell command usage

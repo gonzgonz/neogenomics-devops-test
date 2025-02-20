@@ -6,4 +6,7 @@ repos:
       - id: terraform_tflint
       - id: terraform_docs
         args: ["markdown", "README.md"]
-
+  - repo: https://github.com/ansible-community/ansible-lint.git
+    rev: v6.20.0  # Use latest stable version
+    hooks:
+      - id: ansible-lint
